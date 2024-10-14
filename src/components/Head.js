@@ -1,10 +1,21 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { toggleMenu } from '../utils/appSlice';
 
 const Head = () => {
+  //This line creates a variable dispatch that holds the reference to the dispatch function.
+  //With this, you can use dispatch in your component to send actions to the Redux store.
+  const dispatch = useDispatch();
+
+  const handleToggleMenu = ()=>{
+    dispatch(toggleMenu())
+  }
+
   return (
     <div className='grid grid-flow-col p-5 m-2 shadow'>
       <div className='flex col-span-1'>
         <img 
+            onClick={handleToggleMenu}
             className="h-14"
             alt='hamburger-menu' 
             src="data:image/png;base64,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" 
