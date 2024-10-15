@@ -1,15 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toggleMenu } from '../utils/appSlice';
+import { YOUTUBE_SEARCH_SUGGESTION_API } from '../utils/constants';
 
 const Head = () => {
   //This line creates a variable dispatch that holds the reference to the dispatch function.
   //With this, you can use dispatch in your component to send actions to the Redux store.
   const dispatch = useDispatch();
 
+  const [searchQuery, setSearchQuery]= useState("");
+
   const handleToggleMenu = ()=>{
     dispatch(toggleMenu())
   }
+
+  const getSearchSuggestions= async ()=>{
+    const data = await fetch(YOUTUBE_SEARCH_SUGGESTION_API+searchQuery);
+    const json = await data.json();
+  }
+
+  useEffect(()=>{
+    //whenever the dependency changes, it will call this useeffect and start a new timer.
+    //so, if we are not clearing it, there will be lot of timers running in the background for every keypress
+    // to avoid this, need to clear the timer each time
+    const timer = setTimeout(()=> getSearchSuggestions(), 200)  // it will make an api call after 200 milli seconds
+
+    //while unmounting(re-rendering), the function inside the return will get executed.
+    //Here it cleares the timer (after the next keystroke, a new timer will get setup)
+     return ()=>{ clearTimeout(timer)}
+  }, [searchQuery])
 
   return (
     <div className='grid grid-flow-col p-5 m-2 shadow'>
@@ -27,7 +46,12 @@ const Head = () => {
         />
       </div>
       <div className='col-span-10'>
-        <input className='w-1/2 border border-gray-400 p-2 rounded-l-full' type='text' />
+        <input 
+          className='w-1/2 border border-gray-400 p-2 rounded-l-full' 
+          type='text'
+          value={searchQuery}
+          onChange={(e)=> setSearchQuery(e.target.value)}
+          />
         <button className='border border-gray-400 px-5 py-2 rounded-r-full bg-gray-100'>Search</button>
       </div>
       <div className='col-span-1'>
